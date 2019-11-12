@@ -32,7 +32,10 @@ function addVisit (req, res) {
 
 function searchVisits (req, res) {
   const {visitId} = req.query
-  if (visitId && visits[visitId]) return res.status(200).json([visits[visitId]])
+  if (visitId && visits[visitId]) {
+    console.log("Lookup visit", {visitId}, visits[visitId])
+    return res.status(200).json([visits[visitId]])
+  }
 
   const {userId, searchString} = req.query
   if (!userId || !searchString) return res.status(400).json([
@@ -41,11 +44,13 @@ function searchVisits (req, res) {
   if (!users[userId]) return res.status(404).json(["userId not found"])
   const matches = fuzzy.filter(searchString, users[userId], {extract: v => v.name})
     .map(match => match.original)
+  console.log("Match visit", {userId, searchString}, matches)
   if (matches.length) return res.status(200).json(matches)
   return res.status(200).json()
 }
 
 function clearVisits (req, res={sendStatus:()=>{}}) {
+  console.log("Clear visits", visits, users)
   for (let key in visits) delete visits[key]
   for (let key in users) delete users[key]
   return res.sendStatus(204)
